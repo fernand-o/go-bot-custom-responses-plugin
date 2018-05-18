@@ -11,7 +11,7 @@ func TestCustomResponses(t *testing.T) {
 	Convey("Given a text", t, func() {
 		cmd := &bot.PassiveCmd{}
 		Convey("When the text doesn't match a defined pattern", func() {
-			cmd.Raw = "My name is go-bot, I am awesome."
+			cmd.Raw = "fernand-o"
 			s, err := customresponses(cmd)
 
 			So(err, ShouldBeNil)
@@ -24,7 +24,14 @@ func TestCustomResponses(t *testing.T) {
 			s, err := customresponses(cmd)
 
 			So(err, ShouldBeNil)
-			So(s, ShouldEqual, "@fernando")
+			So(s, ShouldEqual, "")
+		})
+
+		Convey("Set and Get a response", func() {
+			cmd.Raw = ""
+			setResponse("iron-man", "@HomemDeFerro")
+			s := getResponse("iron-man")
+			So(s, ShouldEqual, "@HomemDeFerro")
 		})
 
 	})
