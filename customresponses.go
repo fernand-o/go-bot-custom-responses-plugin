@@ -1,8 +1,16 @@
 package customresponses
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/go-chat-bot/bot"
 	"github.com/go-redis/redis"
+)
+
+const (
+	argumentsExample = "!setReponse 'Found a banana' 'banana*'"
+	invalidArguments = "Please inform the params, ex:"
 )
 
 var Keys []string
@@ -30,6 +38,7 @@ func setResponse(pattern string, response string) {
 	if err != nil {
 		panic(err)
 	}
+	loadMessages()
 }
 
 func getResponse(pattern string) string {
@@ -41,18 +50,42 @@ func getResponse(pattern string) string {
 	return response
 }
 
-func customresponses(command *bot.PassiveCmd) (string, error) {
+func responseMessage(response, pattern string) string {
+	return fmt.Sprintf("Ok! I will send a message with %s when i found any matches with %s", response, pattern)
+}
+
+func setReponseCommand(command *bot.Cmd) (msg string, err error) {
+	if len(command.Args) != 2 {
+		msg = argumentsExample
+		return
+	}
+	response := command.Args[0]
+	pattern := command.Args[1]
+	setResponse(pattern, response)
+	msg = responseMessage(pattern, response)
+	return
+}
+
+func customresponses(command *bot.PassiveCmd) (msg string, err error) {
+	var match bool
 	for _, k := range Keys {
-		if k == command.Raw {
-			return getResponse(k), nil
+		match, err = regexp.MatchString(k, command.Raw)
+		if match {
+			msg = getResponse(k)
+			break
 		}
 	}
-	return "", nil
+	return
 }
 
 func init() {
 	bot.RegisterPassiveCommand(
 		"customresponses",
 		customresponses)
+	bot.RegisterCommand(
+		"setResponse",
+		"Defines a custom response for the given pattern",
+		argumentsExample,
+		setReponseCommand)
 	loadMessages()
 }
