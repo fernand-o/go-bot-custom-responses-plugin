@@ -1,6 +1,6 @@
-A plugin for [go-bot](https://github.com/go-chat-bot/bot) that allows defining custom responses for given matches
+A plugin for [go-bot](https://github.com/go-chat-bot/bot) that allows defining custom bot responses for given matches
 
-Usage: 
+Commands: 
 ```
 !responses set match response
 !responses unset match
