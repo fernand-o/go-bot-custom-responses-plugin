@@ -1,5 +1,19 @@
-A plugin for [go-bot](https://github.com/go-chat-bot/bot) that allows defining custom responses with given patterns
+A plugin for [go-bot](https://github.com/go-chat-bot/bot) that allows defining custom responses for given matches
 
+Usage: 
+```
+!responses set match response
+!responses unset match
+!responses list
+```
+
+Examples:
+```
+!responses set "why did the chicken cross the road?" "to get to the other side"
+!responses set "Error processing request of user fernando.almeida" "Hey @fernando, take a look"
+```
+
+To-do:
 - [x] Create project basics
 - [x] Define methods structure
 - [x] Create some tests
