@@ -8,6 +8,7 @@ A plugin for [go-bot](https://github.com/go-chat-bot/bot) that allows defining c
 - [x] Apply regex to find responses from patterns
 - [x] Create and configure heroku redis app
 - [x] Deploy a bot instance and test with slack -> [repo](https://github.com/fernand-o/got-bot-heroku)
-- [ ] Create command to list defined responses
-- [ ] Create command to delete/clear defined responses
+- [x] Create command to list defined responses
+- [x] Create command to delete defined responses
+- [ ] Create command to delete all responses
 - [ ] Allow defining prefixes for conditions (to avoid processing all received messages)
