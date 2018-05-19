@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	argumentsExample = "!setReponse 'Found a banana' 'banana*'"
+	argumentsExample = "Usage: \n !responses set 'Is someone there?' 'Hello' \n !responses unset 'Is someone there?' \n !responses list"
 	invalidArguments = "Please inform the params, ex:"
 )
 
@@ -39,35 +39,62 @@ func loadMessages() {
 	}
 }
 
-func setResponse(pattern string, response string) {
-	err := RedisClient.Set(pattern, response, 0).Err()
+func setResponse(args []string) string {
+	if (args[0] != "set") || (args[1] == "") || (args[2] == "") {
+		return argumentsExample
+	}
+	match := args[1]
+	response := args[2]
+	err := RedisClient.Set(match, response, 0).Err()
 	if err != nil {
 		panic(err)
 	}
 	loadMessages()
+	return confirmationMessageSetResponse(match, response)
 }
 
-func getResponse(pattern string) string {
-	response, err := RedisClient.Get(pattern).Result()
+func getResponse(key string) string {
+	response, err := RedisClient.Get(key).Result()
 	if err != nil {
 		panic(err)
 	}
 	return response
 }
 
-func responseMessage(pattern, response string) string {
-	return fmt.Sprintf("Ok! I will send a message with %s when i found any matches with %s", response, pattern)
+func confirmationMessageSetResponse(match string, response string) string {
+	return fmt.Sprintf("Ok! I will send a message with %s when i found any occurences of %s", response, match)
 }
 
-func setReponseCommand(command *bot.Cmd) (msg string, err error) {
-	if len(command.Args) != 2 {
-		msg = argumentsExample
-		return
+func confirmationMessageUnsetResponse(match string) string {
+	return fmt.Sprintf("Done, i'll not say anything more related to %s", match)
+}
+
+func listResponses(param string) string {
+	if param != "list" {
+		return argumentsExample
 	}
-	response := command.Args[0]
-	pattern := command.Args[1]
-	setResponse(pattern, response)
-	msg = responseMessage(pattern, response)
+	return "listing responses.."
+}
+
+func unsetResponse(param, match string) string {
+	if (param != "unset") || (match == "") {
+		return argumentsExample
+	}
+	// (remove from redis)
+	return confirmationMessageUnsetResponse(match)
+}
+
+func responsesCommand(command *bot.Cmd) (msg string, err error) {
+	switch len(command.Args) {
+	case 1:
+		msg = listResponses(command.Args[0])
+	case 2:
+		msg = unsetResponse(command.Args[0], command.Args[1])
+	case 3:
+		msg = setResponse(command.Args)
+	default:
+		msg = argumentsExample
+	}
 	return
 }
 
@@ -89,9 +116,9 @@ func init() {
 		"customresponses",
 		customresponses)
 	bot.RegisterCommand(
-		"setResponse",
-		"Defines a custom response for the given pattern",
+		"responses",
+		"Defines a custom response to be sent when a given string is found in a message",
 		argumentsExample,
-		setReponseCommand)
+		responsesCommand)
 	loadMessages()
 }
