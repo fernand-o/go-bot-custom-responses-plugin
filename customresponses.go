@@ -2,6 +2,7 @@ package customresponses
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/go-chat-bot/bot"
@@ -16,11 +17,11 @@ const (
 var Keys []string
 
 func newClient() *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
+	opt, err := redis.ParseURL(os.Getenv("REDIS_CREDENTIALS"))
+	if err != nil {
+		panic("REDIS_CREDENTIALS env var not defined")
+	}
+	return redis.NewClient(opt)
 }
 
 func loadMessages() {
