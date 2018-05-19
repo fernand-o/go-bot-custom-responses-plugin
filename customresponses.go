@@ -15,27 +15,32 @@ const (
 )
 
 var Keys []string
+var RedisClient *redis.Client
 
-func newClient() *redis.Client {
-	opt, err := redis.ParseURL(os.Getenv("REDIS_URL"))
-	if err != nil {
-		panic("REDIS_URL env var not defined")
+func connectRedis() {
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://:@localhost:6379"
 	}
-	return redis.NewClient(opt)
+
+	opt, err := redis.ParseURL(redisURL)
+	if err != nil {
+		panic(err)
+	}
+
+	RedisClient = redis.NewClient(opt)
 }
 
 func loadMessages() {
 	var err error
-	client := newClient()
-	Keys, err = client.Keys("*").Result()
+	Keys, err = RedisClient.Keys("*").Result()
 	if err != nil {
 		panic(err)
 	}
 }
 
 func setResponse(pattern string, response string) {
-	client := newClient()
-	err := client.Set(pattern, response, 0).Err()
+	err := RedisClient.Set(pattern, response, 0).Err()
 	if err != nil {
 		panic(err)
 	}
@@ -43,15 +48,14 @@ func setResponse(pattern string, response string) {
 }
 
 func getResponse(pattern string) string {
-	client := newClient()
-	response, err := client.Get(pattern).Result()
+	response, err := RedisClient.Get(pattern).Result()
 	if err != nil {
 		panic(err)
 	}
 	return response
 }
 
-func responseMessage(response, pattern string) string {
+func responseMessage(pattern, response string) string {
 	return fmt.Sprintf("Ok! I will send a message with %s when i found any matches with %s", response, pattern)
 }
 
@@ -80,6 +84,7 @@ func customresponses(command *bot.PassiveCmd) (msg string, err error) {
 }
 
 func init() {
+	connectRedis()
 	bot.RegisterPassiveCommand(
 		"customresponses",
 		customresponses)
