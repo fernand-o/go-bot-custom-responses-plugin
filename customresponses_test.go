@@ -9,13 +9,6 @@ import (
 
 var ActiveCmd = &bot.Cmd{}
 
-func defineAndTestResponses(match, response string) {
-	ActiveCmd.Args = []string{match, response}
-	s, err := responsesCommand(ActiveCmd)
-	So(err, ShouldBeNil)
-	So(s, ShouldEqual, confirmationMessageSetResponse(match, response))
-}
-
 func assetInvalidArgument(args []string) {
 	ActiveCmd.Args = args
 	msg, err := responsesCommand(ActiveCmd)
@@ -26,7 +19,7 @@ func assetInvalidArgument(args []string) {
 func TestCustomResponses(t *testing.T) {
 	Convey("Given a text", t, func() {
 		RedisClient.FlushDB()
-		// passiveCmd := &bot.PassiveCmd{}
+		passiveCmd := &bot.PassiveCmd{}
 
 		Convey("!reponses", func() {
 			Convey("Wrong parameters", func() {
@@ -40,48 +33,45 @@ func TestCustomResponses(t *testing.T) {
 				assetInvalidArgument([]string{"list", "wtf"})
 			})
 
-			Convey("set", func() {
+			Convey("list", func() {
+				ActiveCmd.Args = []string{"list"}
+				msg, _ := responsesCommand(ActiveCmd)
+				So(msg, ShouldEqual, userMessageNoResposesDefined())
+
+				ActiveCmd.Args = []string{"set", "Life meaning", "42"}
+				_, _ = responsesCommand(ActiveCmd)
+				ActiveCmd.Args = []string{"set", "I don't know Rick", "Just shoot them Morty"}
+				_, _ = responsesCommand(ActiveCmd)
+
+				ActiveCmd.Args = []string{"list"}
+				msg, _ = responsesCommand(ActiveCmd)
+				list := "List of defined responses:\nI don't know Rick -> Just shoot them Morty\nLife meaning -> 42"
+				So(msg, ShouldEqual, list)
+			})
+
+			Convey("set, unset", func() {
 				match := "Is someone there?"
 				response := "Hello"
 				ActiveCmd.Args = []string{"set", match, response}
 				msg, err := responsesCommand(ActiveCmd)
 				So(err, ShouldBeNil)
-				So(msg, ShouldEqual, confirmationMessageSetResponse(match, response))
-				//test responses
-			})
+				So(msg, ShouldEqual, userMessageSetResponse(match, response))
 
-			Convey("unset", func() {
-				match := "Is someone there?"
-				ActiveCmd.Args = []string{"unset", match}
-				msg, err := responsesCommand(ActiveCmd)
+				passiveCmd.Raw = "Hey! Is someone there?"
+				msg, err = customresponses(passiveCmd)
 				So(err, ShouldBeNil)
-				So(msg, ShouldEqual, confirmationMessageUnsetResponse(match))
+				So(msg, ShouldEqual, response)
+
+				ActiveCmd.Args = []string{"unset", match}
+				msg, err = responsesCommand(ActiveCmd)
+				So(err, ShouldBeNil)
+				So(msg, ShouldEqual, userMessageUnsetResponse(match))
+
+				passiveCmd.Raw = "Hey! Is someone there?"
+				msg, err = customresponses(passiveCmd)
+				So(err, ShouldBeNil)
+				So(msg, ShouldEqual, "")
 			})
 		})
-
-		// Convey("When the text doesn't match a defined pattern", func() {
-		// 	passiveCmd.Raw = "lorem ipsum"
-		// 	s, err := customresponses(passiveCmd)
-
-		// 	So(err, ShouldBeNil)
-		// 	So(s, ShouldEqual, "")
-		// })
-
-		// Convey("When the text matches a defined pattern", func() {
-		// 	defineAndTestResponses("fruits", "@apple")
-		// 	passiveCmd.Raw = "The fruits are getting stale"
-		// 	s, err := customresponses(passiveCmd)
-		// 	So(err, ShouldBeNil)
-		// 	So(s, ShouldEqual, "@apple")
-		// })
-
-		// Convey("When the text matches a defined pattern twice", func() {
-		// 	defineAndTestResponses("iron-man", "@HomemDeFerro")
-		// 	passiveCmd.Raw = "iron-mand: The avengers are stronger with iron-man"
-		// 	s, err := customresponses(passiveCmd)
-		// 	So(err, ShouldBeNil)
-		// 	So(s, ShouldEqual, "@HomemDeFerro")
-		// })
-
 	})
 }

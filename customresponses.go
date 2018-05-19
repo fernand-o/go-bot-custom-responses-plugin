@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/go-chat-bot/bot"
 	"github.com/go-redis/redis"
@@ -31,7 +33,7 @@ func connectRedis() {
 	RedisClient = redis.NewClient(opt)
 }
 
-func loadMessages() {
+func loadKeys() {
 	var err error
 	Keys, err = RedisClient.Keys("*").Result()
 	if err != nil {
@@ -49,39 +51,50 @@ func setResponse(args []string) string {
 	if err != nil {
 		panic(err)
 	}
-	loadMessages()
-	return confirmationMessageSetResponse(match, response)
+	return userMessageSetResponse(match, response)
 }
 
 func getResponse(key string) string {
-	response, err := RedisClient.Get(key).Result()
-	if err != nil {
-		panic(err)
-	}
+	response, _ := RedisClient.Get(key).Result()
 	return response
 }
 
-func confirmationMessageSetResponse(match string, response string) string {
+func userMessageSetResponse(match string, response string) string {
 	return fmt.Sprintf("Ok! I will send a message with %s when i found any occurences of %s", response, match)
 }
 
-func confirmationMessageUnsetResponse(match string) string {
+func userMessageUnsetResponse(match string) string {
 	return fmt.Sprintf("Done, i'll not say anything more related to %s", match)
+}
+
+func userMessageNoResposesDefined() string {
+	return fmt.Sprintf("There's no responses defined yet. \n %s", argumentsExample)
 }
 
 func listResponses(param string) string {
 	if param != "list" {
 		return argumentsExample
 	}
-	return "listing responses.."
+	if len(Keys) == 0 {
+		return userMessageNoResposesDefined()
+	}
+
+	var list, line []string
+	for _, k := range Keys {
+		line = []string{k, getResponse(k)}
+		list = append(list, strings.Join(line, " -> "))
+	}
+	sort.Sort(sort.StringSlice(list))
+	list = append([]string{"List of defined responses:"}, list...)
+	return strings.Join(list, "\n")
 }
 
 func unsetResponse(param, match string) string {
 	if (param != "unset") || (match == "") {
 		return argumentsExample
 	}
-	// (remove from redis)
-	return confirmationMessageUnsetResponse(match)
+	RedisClient.Del(match)
+	return userMessageUnsetResponse(match)
 }
 
 func responsesCommand(command *bot.Cmd) (msg string, err error) {
@@ -95,6 +108,7 @@ func responsesCommand(command *bot.Cmd) (msg string, err error) {
 	default:
 		msg = argumentsExample
 	}
+	loadKeys()
 	return
 }
 
@@ -120,5 +134,4 @@ func init() {
 		"Defines a custom response to be sent when a given string is found in a message",
 		argumentsExample,
 		responsesCommand)
-	loadMessages()
 }
