@@ -17,9 +17,9 @@ const (
 var Keys []string
 
 func newClient() *redis.Client {
-	opt, err := redis.ParseURL(os.Getenv("REDIS_CREDENTIALS"))
+	opt, err := redis.ParseURL(os.Getenv("REDIS_URL"))
 	if err != nil {
-		panic("REDIS_CREDENTIALS env var not defined")
+		panic("REDIS_URL env var not defined")
 	}
 	return redis.NewClient(opt)
 }
