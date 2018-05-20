@@ -33,7 +33,7 @@ func TestCustomResponses(t *testing.T) {
 				assetInvalidArgument([]string{"list", "wtf"})
 			})
 
-			Convey("list", func() {
+			Convey("list, clear", func() {
 				ActiveCmd.Args = []string{"list"}
 				msg, _ := responsesCommand(ActiveCmd)
 				So(msg, ShouldEqual, userMessageNoResposesDefined())
@@ -47,6 +47,14 @@ func TestCustomResponses(t *testing.T) {
 				msg, _ = responsesCommand(ActiveCmd)
 				list := "List of defined responses:\nI don't know Rick -> Just shoot them Morty\nLife meaning -> 42"
 				So(msg, ShouldEqual, list)
+
+				ActiveCmd.Args = []string{"clear"}
+				msg, _ = responsesCommand(ActiveCmd)
+				So(msg, ShouldEqual, userMessageResponsesDeleted())
+
+				ActiveCmd.Args = []string{"list"}
+				msg, _ = responsesCommand(ActiveCmd)
+				So(msg, ShouldEqual, userMessageNoResposesDefined())
 			})
 
 			Convey("set, unset", func() {
