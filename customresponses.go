@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	argumentsExample = "Usage: \n !responses set 'Is someone there?' 'Hello' \n !responses unset 'Is someone there?' \n !responses list"
+	argumentsExample = "Usage: \n !responses set \"Is someone there?\" \"Hello\" \n !responses unset \"Is someone there?\" \n !responses list"
 	invalidArguments = "Please inform the params, ex:"
 )
 
@@ -100,15 +100,17 @@ func unsetResponse(param, match string) string {
 func responsesCommand(command *bot.Cmd) (msg string, err error) {
 	switch len(command.Args) {
 	case 1:
+		loadKeys()
 		msg = listResponses(command.Args[0])
 	case 2:
 		msg = unsetResponse(command.Args[0], command.Args[1])
+		loadKeys()
 	case 3:
 		msg = setResponse(command.Args)
+		loadKeys()
 	default:
 		msg = argumentsExample
 	}
-	loadKeys()
 	return
 }
 
