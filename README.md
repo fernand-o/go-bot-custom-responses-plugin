@@ -5,6 +5,7 @@ Commands:
 !responses set match response
 !responses unset match
 !responses list
+!responses clear
 ```
 
 Examples:
@@ -22,7 +23,8 @@ To-do:
 - [x] Apply regex to find responses from patterns
 - [x] Create and configure heroku redis app
 - [x] Deploy a bot instance and test with slack -> [repo](https://github.com/fernand-o/got-bot-heroku)
-- [x] Create command to list defined responses
-- [x] Create command to delete defined responses
-- [ ] Create command to delete all responses
+- [x] Create command to list defined responses -> (!responses list)
+- [x] Create command to delete defined responses -> (!responses unset)
+- [x] Create command to delete all responses -> (!responses list)
 - [ ] Allow defining prefixes for conditions (to avoid processing all received messages)
+- [ ] ...?
