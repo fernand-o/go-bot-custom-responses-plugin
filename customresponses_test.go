@@ -16,6 +16,13 @@ func assetInvalidArgument(args []string) {
 	So(msg, ShouldEqual, argumentsExample)
 }
 
+func sendCommandAndAssertMessage(args []string, expectedMessage string) {
+	ActiveCmd.Args = args
+	msg, err := responsesCommand(ActiveCmd)
+	So(err, ShouldBeNil)
+	So(msg, ShouldEqual, expectedMessage)
+}
+
 func TestCustomResponses(t *testing.T) {
 	Convey("Given a text", t, func() {
 		RedisClient.FlushDB()
@@ -34,27 +41,18 @@ func TestCustomResponses(t *testing.T) {
 			})
 
 			Convey("list, clear", func() {
-				ActiveCmd.Args = []string{"list"}
-				msg, _ := responsesCommand(ActiveCmd)
-				So(msg, ShouldEqual, userMessageNoResposesDefined())
+				sendCommandAndAssertMessage([]string{"list"}, userMessageNoResposesDefined())
 
 				ActiveCmd.Args = []string{"set", "Life meaning", "42"}
 				_, _ = responsesCommand(ActiveCmd)
 				ActiveCmd.Args = []string{"set", "I don't know Rick", "Just shoot them Morty"}
 				_, _ = responsesCommand(ActiveCmd)
 
-				ActiveCmd.Args = []string{"list"}
-				msg, _ = responsesCommand(ActiveCmd)
 				list := "List of defined responses:\nI don't know Rick -> Just shoot them Morty\nLife meaning -> 42"
-				So(msg, ShouldEqual, list)
+				sendCommandAndAssertMessage([]string{"list"}, list)
 
-				ActiveCmd.Args = []string{"clear"}
-				msg, _ = responsesCommand(ActiveCmd)
-				So(msg, ShouldEqual, userMessageResponsesDeleted())
-
-				ActiveCmd.Args = []string{"list"}
-				msg, _ = responsesCommand(ActiveCmd)
-				So(msg, ShouldEqual, userMessageNoResposesDefined())
+				sendCommandAndAssertMessage([]string{"clear"}, userMessageResponsesDeleted())
+				sendCommandAndAssertMessage([]string{"list"}, userMessageNoResposesDefined())
 			})
 
 			Convey("set, unset", func() {
