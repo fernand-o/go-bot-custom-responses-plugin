@@ -29,4 +29,5 @@ A plugin for [go-bot](https://github.com/go-chat-bot/bot) that allows defining c
 - [x] Create command to delete all responses -> (!responses list)
 - [ ] Allow defining prefixes for conditions (to avoid processing all received messages)
 - [ ] Define lists with random responses to send combined with the defined response
+- [ ] Create an easier way of deleting responses
 - [ ] ...?
