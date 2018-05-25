@@ -1,6 +1,6 @@
 A plugin for [go-bot](https://github.com/go-chat-bot/bot) that allows defining custom bot responses for given matches
 
-Commands: 
+Commands:
 ```
 !responses set match response
 !responses unset match
@@ -27,4 +27,5 @@ To-do:
 - [x] Create command to delete defined responses -> (!responses unset)
 - [x] Create command to delete all responses -> (!responses list)
 - [ ] Allow defining prefixes for conditions (to avoid processing all received messages)
+- [ ] Define lists with random responses to send combined with the defined response
 - [ ] ...?
