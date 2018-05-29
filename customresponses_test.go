@@ -95,18 +95,30 @@ func TestCustomResponses(t *testing.T) {
 				ActiveCmd.Args = []string{"list", "add", "#sadfacts", sadfacts[0]}
 				_, _ = responsesCommand(ActiveCmd)
 
-				list := strings.Join([]string{
-					"Defined lists:",
-					"```",
-					"#sadfacts",
-					" - " + sadfacts[0],
-					"",
-					"#funfacts",
-					" - " + funfacts[1],
-					" - " + funfacts[0],
-					"",
-					"```"}, "\n")
-				sendCommandAndAssertMessage([]string{"list", "showall"}, list)
+				Convey("showall", func() {
+					list := strings.Join([]string{
+						"Defined lists:",
+						"```",
+						"#sadfacts",
+						" - " + sadfacts[0],
+						"",
+						"#funfacts",
+						" - " + funfacts[1],
+						" - " + funfacts[0],
+						"",
+						"```"}, "\n")
+					sendCommandAndAssertMessage([]string{"list", "showall"}, list)
+				})
+
+				Convey("show", func() {
+					list := strings.Join([]string{
+						"```",
+						"#funfacts",
+						" - " + funfacts[1],
+						" - " + funfacts[0],
+						"```"}, "\n")
+					sendCommandAndAssertMessage([]string{"list", "show", "#funfacts"}, list)
+				})
 			})
 
 			Convey("add, delete", func() {

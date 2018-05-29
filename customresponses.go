@@ -150,6 +150,23 @@ func matchCommand(args []string) (msg string) {
 	return
 }
 
+func showList(args []string) string {
+	if args[0] != "show" {
+		return argumentsListExample
+	}
+
+	return "```\n" + getListMembers(args[1]) + "\n```"
+}
+
+func getListMembers(listname string) string {
+	var results = []string{listname}
+	messages, _ := RedisClient.SMembers(listname).Result()
+	for _, m := range messages {
+		results = append(results, " - "+m)
+	}
+	return strings.Join(results, "\n")
+}
+
 func showAllLists(param string) string {
 	if param != "showall" {
 		return argumentsListExample
@@ -160,13 +177,9 @@ func showAllLists(param string) string {
 		return userMessageNoListsDefined()
 	}
 
-	var results, messages []string
+	var results []string
 	for _, k := range lists {
-		results = append(results, k)
-		messages, _ = RedisClient.SMembers(k).Result()
-		for _, m := range messages {
-			results = append(results, " - "+m)
-		}
+		results = append(results, getListMembers(k))
 		results = append(results, "")
 	}
 
@@ -205,6 +218,8 @@ func listCommand(args []string) (msg string) {
 	switch len(args) {
 	case 1:
 		msg = showAllLists(args[0])
+	case 2:
+		msg = showList(args)
 	case 3:
 		msg = addOrDeleteListMessage(args)
 	default:
