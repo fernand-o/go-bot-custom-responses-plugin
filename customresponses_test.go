@@ -116,22 +116,12 @@ func TestCustomResponses(t *testing.T) {
 				ActiveCmd.Args = []string{"list", "add", listname, message}
 				msg, err := responsesCommand(ActiveCmd)
 				So(err, ShouldBeNil)
-				So(msg, ShouldEqual, userMessageAddList(listname, message))
+				So(msg, ShouldEqual, userMessageListMessageAdded(listname, message))
 
-				// passiveCmd.Raw = "Hey! Is someone there?"
-				// msg, err = customresponses(passiveCmd)
-				// So(err, ShouldBeNil)
-				// So(msg, ShouldEqual, response)
-
-				// ActiveCmd.Args = []string{"list", "unset", match}
-				// msg, err = responsesCommand(ActiveCmd)
-				// So(err, ShouldBeNil)
-				// So(msg, ShouldEqual, userMessageUnsetResponse(match))
-
-				// passiveCmd.Raw = "Hey! Is someone there?"
-				// msg, err = customresponses(passiveCmd)
-				// So(err, ShouldBeNil)
-				// So(msg, ShouldEqual, "")
+				ActiveCmd.Args = []string{"list", "delete", listname, message}
+				msg, err = responsesCommand(ActiveCmd)
+				So(err, ShouldBeNil)
+				So(msg, ShouldEqual, userMessageListMessageDeleted(listname, message))
 			})
 		})
 	})

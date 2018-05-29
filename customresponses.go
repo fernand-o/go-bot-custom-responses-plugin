@@ -78,8 +78,12 @@ func userMessageResponsesDeleted() string {
 	return "All responses were deleted."
 }
 
-func userMessageAddList(list, message string) string {
+func userMessageListMessageAdded(list, message string) string {
 	return fmt.Sprintf("The message `%s` was added to the list `%s`.", message, list)
+}
+
+func userMessageListMessageDeleted(list, message string) string {
+	return fmt.Sprintf("The message `%s` was delete of the list `%s`.", message, list)
 }
 
 func userMessageListDeleted(list string) string {
@@ -167,30 +171,39 @@ func showAllLists(param string) string {
 	return ""
 }
 
-func addListMessage(args []string) string {
-	if args[0] != "add" {
-		return argumentsListExample
-	}
-
-	listname := args[1]
-	message := args[2]
-
+func addListMessage(listname, message string) string {
 	err := RedisClient.LPush(listname, message).Err()
 	if err != nil {
 		panic(err)
 	}
+	return userMessageListMessageAdded(listname, message)
+}
 
-	return userMessageAddList(listname, message)
+func deleteListMessage(listname, message string) string {
+	err := RedisClient.LRem(listname, 0, message).Err()
+	if err != nil {
+		panic(err)
+	}
+	return userMessageListMessageDeleted(listname, message)
+}
+
+func addOrDeleteListMessage(args []string) string {
+	switch args[0] {
+	case "add":
+		return addListMessage(args[1], args[2])
+	case "delete":
+		return deleteListMessage(args[1], args[2])
+	default:
+		return argumentsListExample
+	}
 }
 
 func listCommand(args []string) (msg string) {
 	switch len(args) {
 	case 1:
 		msg = showAllLists(args[0])
-	case 2:
-		// msg = unsetResponse(args[0], args[1])
 	case 3:
-		msg = addListMessage(args)
+		msg = addOrDeleteListMessage(args)
 	default:
 		msg = argumentsExample
 	}
