@@ -116,17 +116,41 @@ func unsetResponse(param, match string) string {
 	return userMessageUnsetResponse(match)
 }
 
-func responsesCommand(command *bot.Cmd) (msg string, err error) {
-	switch len(command.Args) {
+func matchCommand(args []string) (msg string) {
+	switch len(args) {
 	case 1:
 		loadMatches()
-		msg = showOrClearResponses(command.Args[0])
+		msg = showOrClearResponses(args[0])
 	case 2:
-		msg = unsetResponse(command.Args[0], command.Args[1])
+		msg = unsetResponse(args[0], args[1])
 		loadMatches()
 	case 3:
-		msg = setResponse(command.Args)
+		msg = setResponse(args)
 		loadMatches()
+	default:
+		msg = argumentsExample
+	}
+	return
+}
+
+func listCommand(args []string) (msg string) {
+	return
+}
+
+func responsesCommand(command *bot.Cmd) (msg string, err error) {
+	if len(command.Args) < 2 {
+		msg = argumentsExample
+		return
+	}
+
+	operation := command.Args[0]
+	args := append([]string{}, command.Args[1:]...)
+
+	switch operation {
+	case "match":
+		msg = matchCommand(args)
+	case "list":
+		msg = listCommand(args)
 	default:
 		msg = argumentsExample
 	}
