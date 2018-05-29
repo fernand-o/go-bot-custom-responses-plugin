@@ -19,7 +19,6 @@ const (
 )
 
 var Matches []string
-var Lists []string
 var RedisClient *redis.Client
 
 func connectRedis() {
@@ -156,23 +155,27 @@ func showAllLists(param string) string {
 		return argumentsListExample
 	}
 
-	if len(Lists) == 0 {
+	lists, _ := RedisClient.Keys("#*").Result()
+	if len(lists) == 0 {
 		return userMessageNoListsDefined()
 	}
 
-	// var list, line []string
-	// for _, k := range Lists {
-	// 	line = []string{k, getList(k)}
-	// 	list = append(list, strings.Join(line, " -> "))
-	// }
-	// sort.Sort(sort.StringSlice(list))
-	// list = append([]string{"List of defined responses:", "```"}, append(list, []string{"```"}...)...)
-	// return strings.Join(list, "\n")
-	return ""
+	var results, messages []string
+	for _, k := range lists {
+		results = append(results, k)
+		messages, _ = RedisClient.SMembers(k).Result()
+		for _, m := range messages {
+			results = append(results, " - "+m)
+		}
+		results = append(results, "")
+	}
+
+	results = append([]string{"Defined lists:", "```"}, append(results, []string{"```"}...)...)
+	return strings.Join(results, "\n")
 }
 
 func addListMessage(listname, message string) string {
-	err := RedisClient.LPush(listname, message).Err()
+	err := RedisClient.SAdd(listname, message).Err()
 	if err != nil {
 		panic(err)
 	}
@@ -180,7 +183,7 @@ func addListMessage(listname, message string) string {
 }
 
 func deleteListMessage(listname, message string) string {
-	err := RedisClient.LRem(listname, 0, message).Err()
+	err := RedisClient.SRem(listname, message).Err()
 	if err != nil {
 		panic(err)
 	}

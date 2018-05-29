@@ -1,6 +1,7 @@
 package customresponses
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/go-chat-bot/bot"
@@ -82,32 +83,30 @@ func TestCustomResponses(t *testing.T) {
 
 		Convey("list", func() {
 			Convey("showall, show, clear", func() {
-				// sendCommandAndAssertMessage([]string{"list", "showall"}, userMessageNoListsDefined())
+				sendCommandAndAssertMessage([]string{"list", "showall"}, userMessageNoListsDefined())
 
-				// funfacts := []string{"Bananas are curved because they grow towards the sun.", "If you lift a kagaroo's tail off the ground it can't hop."}
-				// sadfacts := []string{"Heart attacks are more likely to happen on a Monday."}
+				funfacts := []string{"Bananas are curved because they grow towards the sun.", "If you lift a kagaroo's tail off the ground it can't hop."}
+				sadfacts := []string{"Heart attacks are more likely to happen on a Monday."}
 
-				// ActiveCmd.Args = []string{"list", "add", "#funfacts", funfacts[0]}
-				// _, _ = responsesCommand(ActiveCmd)
-				// ActiveCmd.Args = []string{"list", "add", "#funfacts", funfacts[1]}
-				// _, _ = responsesCommand(ActiveCmd)
-				// ActiveCmd.Args = []string{"list", "add", "#sadfacts", sadfacts[0]}
-				// _, _ = responsesCommand(ActiveCmd)
+				ActiveCmd.Args = []string{"list", "add", "#funfacts", funfacts[0]}
+				_, _ = responsesCommand(ActiveCmd)
+				ActiveCmd.Args = []string{"list", "add", "#funfacts", funfacts[1]}
+				_, _ = responsesCommand(ActiveCmd)
+				ActiveCmd.Args = []string{"list", "add", "#sadfacts", sadfacts[0]}
+				_, _ = responsesCommand(ActiveCmd)
 
-				// list := strings.Join([]string{
-				// 	"Defined lists:",
-				// 	"```",
-				// 	"#funfacts",
-				// 	" - " + funfacts[0],
-				// 	" - " + funfacts[1],
-				// 	"",
-				// 	"#sadfacts",
-				// 	" - " + sadfacts[0],
-				// 	"```"}, "\n")
-				// sendCommandAndAssertMessage([]string{"list", "showall"}, list)
-
-				// sendCommandAndAssertMessage([]string{"list", "clear", "#funfacts"}, userMessageListDeleted("#funfacts"))
-				// sendCommandAndAssertMessage([]string{"list", "clear", "#sadfacts"}, userMessageListDeleted("#sadfacts"))
+				list := strings.Join([]string{
+					"Defined lists:",
+					"```",
+					"#sadfacts",
+					" - " + sadfacts[0],
+					"",
+					"#funfacts",
+					" - " + funfacts[1],
+					" - " + funfacts[0],
+					"",
+					"```"}, "\n")
+				sendCommandAndAssertMessage([]string{"list", "showall"}, list)
 			})
 
 			Convey("add, delete", func() {
