@@ -93,6 +93,10 @@ func userMessageNoListsDefined() string {
 	return fmt.Sprintf("There are no lists defined yet. \n %s", argumentsListExample)
 }
 
+func userMessageListInvalidName() string {
+	return "The list name must starts with #"
+}
+
 func showOrClearResponses(param string) (msg string) {
 	switch param {
 	case "show":
@@ -205,11 +209,17 @@ func removeListMessage(listname, message string) string {
 }
 
 func addOrRemoveListMessage(args []string) string {
+	listname := args[1]
+	message := args[2]
+	if !strings.HasPrefix(listname, "#") {
+		return userMessageListInvalidName()
+	}
+
 	switch args[0] {
 	case "add":
-		return addListMessage(args[1], args[2])
+		return addListMessage(listname, message)
 	case "remove":
-		return removeListMessage(args[1], args[2])
+		return removeListMessage(listname, message)
 	default:
 		return argumentsListExample
 	}

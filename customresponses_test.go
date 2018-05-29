@@ -137,6 +137,11 @@ func TestCustomResponses(t *testing.T) {
 				msg, err = responsesCommand(ActiveCmd)
 				So(err, ShouldBeNil)
 				So(msg, ShouldEqual, userMessageListMessageRemoved(listname, message))
+
+				ActiveCmd.Args = []string{"list", "add", "invalidname", message}
+				msg, err = responsesCommand(ActiveCmd)
+				So(err, ShouldBeNil)
+				So(msg, ShouldEqual, userMessageListInvalidName())
 			})
 		})
 	})
