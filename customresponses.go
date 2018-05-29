@@ -69,17 +69,17 @@ func userMessageUnsetResponse(match string) string {
 }
 
 func userMessageNoResposesDefined() string {
-	return fmt.Sprintf("There's no responses defined yet. \n %s", argumentsExample)
+	return fmt.Sprintf("There are no responses defined yet. \n %s", argumentsExample)
 }
 
 func userMessageResponsesDeleted() string {
 	return "All responses were deleted."
 }
 
-func listOrClearResponses(param string) (msg string) {
+func showOrClearResponses(param string) (msg string) {
 	switch param {
-	case "list":
-		msg = listResponses()
+	case "show":
+		msg = showResponses()
 	case "clear":
 		msg = clearResponses()
 	default:
@@ -93,7 +93,7 @@ func clearResponses() string {
 	return userMessageResponsesDeleted()
 }
 
-func listResponses() string {
+func showResponses() string {
 	if len(Matches) == 0 {
 		return userMessageNoResposesDefined()
 	}
@@ -120,7 +120,7 @@ func responsesCommand(command *bot.Cmd) (msg string, err error) {
 	switch len(command.Args) {
 	case 1:
 		loadMatches()
-		msg = listOrClearResponses(command.Args[0])
+		msg = showOrClearResponses(command.Args[0])
 	case 2:
 		msg = unsetResponse(command.Args[0], command.Args[1])
 		loadMatches()

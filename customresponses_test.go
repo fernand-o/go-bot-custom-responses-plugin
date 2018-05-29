@@ -37,11 +37,11 @@ func TestCustomResponses(t *testing.T) {
 				assetInvalidArgument([]string{"set", ""})
 				assetInvalidArgument([]string{"unset"})
 				assetInvalidArgument([]string{"unset", ""})
-				assetInvalidArgument([]string{"list", "wtf"})
+				assetInvalidArgument([]string{"show", "wtf"})
 			})
 
-			Convey("list, clear", func() {
-				sendCommandAndAssertMessage([]string{"list"}, userMessageNoResposesDefined())
+			Convey("show, clear", func() {
+				sendCommandAndAssertMessage([]string{"show"}, userMessageNoResposesDefined())
 
 				ActiveCmd.Args = []string{"set", "Life meaning", "42"}
 				_, _ = responsesCommand(ActiveCmd)
@@ -49,10 +49,10 @@ func TestCustomResponses(t *testing.T) {
 				_, _ = responsesCommand(ActiveCmd)
 
 				list := "List of defined responses:\n```\nI don't know Rick -> Just shoot them Morty\nLife meaning -> 42\n```"
-				sendCommandAndAssertMessage([]string{"list"}, list)
+				sendCommandAndAssertMessage([]string{"show"}, list)
 
 				sendCommandAndAssertMessage([]string{"clear"}, userMessageResponsesDeleted())
-				sendCommandAndAssertMessage([]string{"list"}, userMessageNoResposesDefined())
+				sendCommandAndAssertMessage([]string{"show"}, userMessageNoResposesDefined())
 			})
 
 			Convey("set, unset", func() {
