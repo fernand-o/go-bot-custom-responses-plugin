@@ -14,9 +14,10 @@ import (
 const (
 	argumentsExample = "Usage: \n !responses set \"Is someone there?\" \"Hello\" \n !responses unset \"Is someone there?\" \n !responses list"
 	invalidArguments = "Please inform the params, ex:"
+	matchesKey       = "matches"
 )
 
-var Keys []string
+var Matches []string
 var RedisClient *redis.Client
 
 func connectRedis() {
@@ -33,9 +34,9 @@ func connectRedis() {
 	RedisClient = redis.NewClient(opt)
 }
 
-func loadKeys() {
+func loadMatches() {
 	var err error
-	Keys, err = RedisClient.Keys("*").Result()
+	Matches, err = RedisClient.HKeys(matchesKey).Result()
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +48,7 @@ func setResponse(args []string) string {
 	}
 	match := args[1]
 	response := args[2]
-	err := RedisClient.Set(match, response, 0).Err()
+	err := RedisClient.HSet(matchesKey, match, response).Err()
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +56,7 @@ func setResponse(args []string) string {
 }
 
 func getResponse(key string) string {
-	response, _ := RedisClient.Get(key).Result()
+	response, _ := RedisClient.HGet(matchesKey, key).Result()
 	return response
 }
 
@@ -93,12 +94,12 @@ func clearResponses() string {
 }
 
 func listResponses() string {
-	if len(Keys) == 0 {
+	if len(Matches) == 0 {
 		return userMessageNoResposesDefined()
 	}
 
 	var list, line []string
-	for _, k := range Keys {
+	for _, k := range Matches {
 		line = []string{k, getResponse(k)}
 		list = append(list, strings.Join(line, " -> "))
 	}
@@ -111,21 +112,21 @@ func unsetResponse(param, match string) string {
 	if (param != "unset") || (match == "") {
 		return argumentsExample
 	}
-	RedisClient.Del(match)
+	RedisClient.HDel(matchesKey, match)
 	return userMessageUnsetResponse(match)
 }
 
 func responsesCommand(command *bot.Cmd) (msg string, err error) {
 	switch len(command.Args) {
 	case 1:
-		loadKeys()
+		loadMatches()
 		msg = listOrClearResponses(command.Args[0])
 	case 2:
 		msg = unsetResponse(command.Args[0], command.Args[1])
-		loadKeys()
+		loadMatches()
 	case 3:
 		msg = setResponse(command.Args)
-		loadKeys()
+		loadMatches()
 	default:
 		msg = argumentsExample
 	}
@@ -134,7 +135,7 @@ func responsesCommand(command *bot.Cmd) (msg string, err error) {
 
 func customresponses(command *bot.PassiveCmd) (msg string, err error) {
 	var match bool
-	for _, k := range Keys {
+	for _, k := range Matches {
 		match, err = regexp.MatchString(k, command.Raw)
 		if match {
 			msg = getResponse(k)
