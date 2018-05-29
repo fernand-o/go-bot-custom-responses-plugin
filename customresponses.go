@@ -81,8 +81,8 @@ func userMessageListMessageAdded(list, message string) string {
 	return fmt.Sprintf("The message `%s` was added to the list `%s`.", message, list)
 }
 
-func userMessageListMessageDeleted(list, message string) string {
-	return fmt.Sprintf("The message `%s` was delete of the list `%s`.", message, list)
+func userMessageListMessageRemoved(list, message string) string {
+	return fmt.Sprintf("The message `%s` was removed of the list `%s`.", message, list)
 }
 
 func userMessageListDeleted(list string) string {
@@ -150,12 +150,15 @@ func matchCommand(args []string) (msg string) {
 	return
 }
 
-func showList(args []string) string {
-	if args[0] != "show" {
+func showOrClearList(args []string) string {
+	switch args[0] {
+	case "show":
+		return "```\n" + getListMembers(args[1]) + "\n```"
+	case "delete":
+		return userMessageListDeleted(args[1])
+	default:
 		return argumentsListExample
 	}
-
-	return "```\n" + getListMembers(args[1]) + "\n```"
 }
 
 func getListMembers(listname string) string {
@@ -195,20 +198,20 @@ func addListMessage(listname, message string) string {
 	return userMessageListMessageAdded(listname, message)
 }
 
-func deleteListMessage(listname, message string) string {
+func removeListMessage(listname, message string) string {
 	err := RedisClient.SRem(listname, message).Err()
 	if err != nil {
 		panic(err)
 	}
-	return userMessageListMessageDeleted(listname, message)
+	return userMessageListMessageRemoved(listname, message)
 }
 
-func addOrDeleteListMessage(args []string) string {
+func addOrRemoveListMessage(args []string) string {
 	switch args[0] {
 	case "add":
 		return addListMessage(args[1], args[2])
-	case "delete":
-		return deleteListMessage(args[1], args[2])
+	case "remove":
+		return removeListMessage(args[1], args[2])
 	default:
 		return argumentsListExample
 	}
@@ -219,9 +222,9 @@ func listCommand(args []string) (msg string) {
 	case 1:
 		msg = showAllLists(args[0])
 	case 2:
-		msg = showList(args)
+		msg = showOrClearList(args)
 	case 3:
-		msg = addOrDeleteListMessage(args)
+		msg = addOrRemoveListMessage(args)
 	default:
 		msg = argumentsExample
 	}

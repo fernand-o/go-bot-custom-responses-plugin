@@ -82,7 +82,7 @@ func TestCustomResponses(t *testing.T) {
 		})
 
 		Convey("list", func() {
-			Convey("showall, show, clear", func() {
+			Convey("showall, show, delete", func() {
 				sendCommandAndAssertMessage([]string{"list", "showall"}, userMessageNoListsDefined())
 
 				funfacts := []string{"Bananas are curved because they grow towards the sun.", "If you lift a kagaroo's tail off the ground it can't hop."}
@@ -119,9 +119,13 @@ func TestCustomResponses(t *testing.T) {
 						"```"}, "\n")
 					sendCommandAndAssertMessage([]string{"list", "show", "#funfacts"}, list)
 				})
+
+				Convey("delete", func() {
+					sendCommandAndAssertMessage([]string{"list", "delete", "#funfacts"}, userMessageListDeleted("#funfacts"))
+				})
 			})
 
-			Convey("add, delete", func() {
+			Convey("add, remove", func() {
 				listname := "#randomfacts"
 				message := "You cannot snore and dream at the same time."
 				ActiveCmd.Args = []string{"list", "add", listname, message}
@@ -129,10 +133,10 @@ func TestCustomResponses(t *testing.T) {
 				So(err, ShouldBeNil)
 				So(msg, ShouldEqual, userMessageListMessageAdded(listname, message))
 
-				ActiveCmd.Args = []string{"list", "delete", listname, message}
+				ActiveCmd.Args = []string{"list", "remove", listname, message}
 				msg, err = responsesCommand(ActiveCmd)
 				So(err, ShouldBeNil)
-				So(msg, ShouldEqual, userMessageListMessageDeleted(listname, message))
+				So(msg, ShouldEqual, userMessageListMessageRemoved(listname, message))
 			})
 		})
 	})
