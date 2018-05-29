@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/go-chat-bot/bot"
@@ -15,10 +16,16 @@ const (
 	argumentsExample     = "Usage: \n```\n!responses set \"Is someone there?\" \"Hello\" \n !responses unset \"Is someone there?\" \n !responses list\n```"
 	argumentsListExample = "Usage: \n```\n !responses list add mylist \"Some random message\" \n !responses list delete mylist \"Some random message\" \n !responses list clear mylist\n```"
 	invalidArguments     = "Please inform the params, ex:"
-	matchesKey           = "matches"
 )
 
-var Matches []string
+type Match struct {
+	key      string
+	match    string
+	response string
+	list     string
+}
+
+var Matches []Match
 var RedisClient *redis.Client
 
 func connectRedis() {
@@ -36,29 +43,27 @@ func connectRedis() {
 }
 
 func loadMatches() {
+	Matches = []Match{}
 	var err error
-	Matches, err = RedisClient.HKeys(matchesKey).Result()
+	matches, err := RedisClient.Keys(matchesKeyFmt("*")).Result()
 	if err != nil {
 		panic(err)
 	}
+
+	var values map[string]string
+	var match Match
+	for _, key := range matches {
+		values, _ = RedisClient.HGetAll(key).Result()
+		match.match = values["match"]
+		match.response = values["response"]
+		match.list = values["list"]
+		match.key = key
+		Matches = append(Matches, match)
+	}
 }
 
-func setResponse(args []string) string {
-	if (args[0] != "set") || (args[1] == "") || (args[2] == "") {
-		return argumentsExample
-	}
-	match := args[1]
-	response := args[2]
-	err := RedisClient.HSet(matchesKey, match, response).Err()
-	if err != nil {
-		panic(err)
-	}
-	return userMessageSetResponse(match, response)
-}
-
-func getResponse(key string) string {
-	response, _ := RedisClient.HGet(matchesKey, key).Result()
-	return response
+func matchesKeyFmt(sufix string) string {
+	return "matches:" + sufix
 }
 
 func userMessageSetResponse(match, response string) string {
@@ -121,19 +126,55 @@ func showResponses() string {
 
 	var results, line []string
 	for _, k := range Matches {
-		line = []string{k, getResponse(k)}
+		line = []string{k.match, k.response}
 		results = append(results, strings.Join(line, " -> "))
 	}
 	sort.Sort(sort.StringSlice(results))
 	return fmt.Sprintf("List of defined responses:\n```\n%s\n```", strings.Join(results, "\n"))
 }
 
-func unsetResponse(param, match string) string {
-	if (param != "unset") || (match == "") {
+func setResponse(args []string) string {
+	if args[0] != "set" {
 		return argumentsExample
 	}
-	RedisClient.HDel(matchesKey, match)
-	return userMessageUnsetResponse(match)
+
+	match := args[1]
+	response := args[2]
+	list := "_"
+	if len(args) == 4 {
+		list = args[3]
+	}
+
+	params := map[string]interface{}{
+		"match":    match,
+		"response": response,
+		"list":     list}
+
+	count, _ := RedisClient.DBSize().Result()
+	key := matchesKeyFmt(strconv.Itoa(int(count)))
+	err := RedisClient.HMSet(key, params).Err()
+	if err != nil {
+		panic(err)
+	}
+	return userMessageSetResponse(match, response)
+}
+
+func unsetResponse(param, id string) string {
+	if param != "unset" {
+		return argumentsExample
+	}
+	key := matchesKeyFmt(id)
+
+	_, err := RedisClient.Del(key).Result()
+	if err != nil {
+		panic(err)
+	}
+	for _, m := range Matches {
+		if m.key == key {
+			return userMessageUnsetResponse(m.match)
+		}
+	}
+	return ""
 }
 
 func matchCommand(args []string) (msg string) {
@@ -261,10 +302,10 @@ func responsesCommand(command *bot.Cmd) (msg string, err error) {
 
 func customresponses(command *bot.PassiveCmd) (msg string, err error) {
 	var match bool
-	for _, k := range Matches {
-		match, err = regexp.MatchString(k, command.Raw)
+	for _, m := range Matches {
+		match, err = regexp.MatchString(m.match, command.Raw)
 		if match {
-			msg = getResponse(k)
+			msg = m.response
 			break
 		}
 	}

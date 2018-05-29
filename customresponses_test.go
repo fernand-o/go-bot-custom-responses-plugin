@@ -69,7 +69,7 @@ func TestCustomResponses(t *testing.T) {
 				So(err, ShouldBeNil)
 				So(msg, ShouldEqual, response)
 
-				ActiveCmd.Args = []string{"match", "unset", match}
+				ActiveCmd.Args = []string{"match", "unset", "0"}
 				msg, err = responsesCommand(ActiveCmd)
 				So(err, ShouldBeNil)
 				So(msg, ShouldEqual, userMessageUnsetResponse(match))
