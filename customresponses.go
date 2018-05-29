@@ -115,14 +115,13 @@ func showResponses() string {
 		return userMessageNoResposesDefined()
 	}
 
-	var list, line []string
+	var results, line []string
 	for _, k := range Matches {
 		line = []string{k, getResponse(k)}
-		list = append(list, strings.Join(line, " -> "))
+		results = append(results, strings.Join(line, " -> "))
 	}
-	sort.Sort(sort.StringSlice(list))
-	list = append([]string{"List of defined responses:", "```"}, append(list, []string{"```"}...)...)
-	return strings.Join(list, "\n")
+	sort.Sort(sort.StringSlice(results))
+	return fmt.Sprintf("List of defined responses:\n```\n%s\n```", strings.Join(results, "\n"))
 }
 
 func unsetResponse(param, match string) string {
@@ -186,8 +185,7 @@ func showAllLists(param string) string {
 		results = append(results, "")
 	}
 
-	results = append([]string{"Defined lists:", "```"}, append(results, []string{"```"}...)...)
-	return strings.Join(results, "\n")
+	return fmt.Sprintf("Defined lists:\n```\n%s\n```", strings.Join(results, "\n"))
 }
 
 func addListMessage(listname, message string) string {
