@@ -103,7 +103,7 @@ func listResponses() string {
 		list = append(list, strings.Join(line, " -> "))
 	}
 	sort.Sort(sort.StringSlice(list))
-	list = append([]string{"List of defined responses:"}, list...)
+	list = append([]string{"List of defined responses:", "```"}, append(list, []string{"```"}...)...)
 	return strings.Join(list, "\n")
 }
 

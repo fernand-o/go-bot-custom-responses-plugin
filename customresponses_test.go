@@ -48,7 +48,7 @@ func TestCustomResponses(t *testing.T) {
 				ActiveCmd.Args = []string{"set", "I don't know Rick", "Just shoot them Morty"}
 				_, _ = responsesCommand(ActiveCmd)
 
-				list := "List of defined responses:\nI don't know Rick -> Just shoot them Morty\nLife meaning -> 42"
+				list := "List of defined responses:\n```\nI don't know Rick -> Just shoot them Morty\nLife meaning -> 42\n```"
 				sendCommandAndAssertMessage([]string{"list"}, list)
 
 				sendCommandAndAssertMessage([]string{"clear"}, userMessageResponsesDeleted())
