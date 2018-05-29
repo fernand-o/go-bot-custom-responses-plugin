@@ -79,5 +79,60 @@ func TestCustomResponses(t *testing.T) {
 				So(msg, ShouldEqual, "")
 			})
 		})
+
+		Convey("list", func() {
+			Convey("showall, show, clear", func() {
+				// sendCommandAndAssertMessage([]string{"list", "showall"}, userMessageNoListsDefined())
+
+				// funfacts := []string{"Bananas are curved because they grow towards the sun.", "If you lift a kagaroo's tail off the ground it can't hop."}
+				// sadfacts := []string{"Heart attacks are more likely to happen on a Monday."}
+
+				// ActiveCmd.Args = []string{"list", "add", "#funfacts", funfacts[0]}
+				// _, _ = responsesCommand(ActiveCmd)
+				// ActiveCmd.Args = []string{"list", "add", "#funfacts", funfacts[1]}
+				// _, _ = responsesCommand(ActiveCmd)
+				// ActiveCmd.Args = []string{"list", "add", "#sadfacts", sadfacts[0]}
+				// _, _ = responsesCommand(ActiveCmd)
+
+				// list := strings.Join([]string{
+				// 	"Defined lists:",
+				// 	"```",
+				// 	"#funfacts",
+				// 	" - " + funfacts[0],
+				// 	" - " + funfacts[1],
+				// 	"",
+				// 	"#sadfacts",
+				// 	" - " + sadfacts[0],
+				// 	"```"}, "\n")
+				// sendCommandAndAssertMessage([]string{"list", "showall"}, list)
+
+				// sendCommandAndAssertMessage([]string{"list", "clear", "#funfacts"}, userMessageListDeleted("#funfacts"))
+				// sendCommandAndAssertMessage([]string{"list", "clear", "#sadfacts"}, userMessageListDeleted("#sadfacts"))
+			})
+
+			Convey("add, delete", func() {
+				listname := "#randomfacts"
+				message := "You cannot snore and dream at the same time."
+				ActiveCmd.Args = []string{"list", "add", listname, message}
+				msg, err := responsesCommand(ActiveCmd)
+				So(err, ShouldBeNil)
+				So(msg, ShouldEqual, userMessageAddList(listname, message))
+
+				// passiveCmd.Raw = "Hey! Is someone there?"
+				// msg, err = customresponses(passiveCmd)
+				// So(err, ShouldBeNil)
+				// So(msg, ShouldEqual, response)
+
+				// ActiveCmd.Args = []string{"list", "unset", match}
+				// msg, err = responsesCommand(ActiveCmd)
+				// So(err, ShouldBeNil)
+				// So(msg, ShouldEqual, userMessageUnsetResponse(match))
+
+				// passiveCmd.Raw = "Hey! Is someone there?"
+				// msg, err = customresponses(passiveCmd)
+				// So(err, ShouldBeNil)
+				// So(msg, ShouldEqual, "")
+			})
+		})
 	})
 }

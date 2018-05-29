@@ -12,12 +12,14 @@ import (
 )
 
 const (
-	argumentsExample = "Usage: \n !responses set \"Is someone there?\" \"Hello\" \n !responses unset \"Is someone there?\" \n !responses list"
-	invalidArguments = "Please inform the params, ex:"
-	matchesKey       = "matches"
+	argumentsExample     = "Usage: \n```\n!responses set \"Is someone there?\" \"Hello\" \n !responses unset \"Is someone there?\" \n !responses list\n```"
+	argumentsListExample = "Usage: \n```\n !responses list add mylist \"Some random message\" \n !responses list delete mylist \"Some random message\" \n !responses list clear mylist\n```"
+	invalidArguments     = "Please inform the params, ex:"
+	matchesKey           = "matches"
 )
 
 var Matches []string
+var Lists []string
 var RedisClient *redis.Client
 
 func connectRedis() {
@@ -60,7 +62,7 @@ func getResponse(key string) string {
 	return response
 }
 
-func userMessageSetResponse(match string, response string) string {
+func userMessageSetResponse(match, response string) string {
 	return fmt.Sprintf("Ok! I will send a message with %s when i found any occurences of %s", response, match)
 }
 
@@ -74,6 +76,18 @@ func userMessageNoResposesDefined() string {
 
 func userMessageResponsesDeleted() string {
 	return "All responses were deleted."
+}
+
+func userMessageAddList(list, message string) string {
+	return fmt.Sprintf("The message `%s` was added to the list `%s`.", message, list)
+}
+
+func userMessageListDeleted(list string) string {
+	return fmt.Sprintf("The list %s was deleted.", list)
+}
+
+func userMessageNoListsDefined() string {
+	return fmt.Sprintf("There are no lists defined yet. \n %s", argumentsListExample)
 }
 
 func showOrClearResponses(param string) (msg string) {
@@ -133,7 +147,53 @@ func matchCommand(args []string) (msg string) {
 	return
 }
 
+func showAllLists(param string) string {
+	if param != "showall" {
+		return argumentsListExample
+	}
+
+	if len(Lists) == 0 {
+		return userMessageNoListsDefined()
+	}
+
+	// var list, line []string
+	// for _, k := range Lists {
+	// 	line = []string{k, getList(k)}
+	// 	list = append(list, strings.Join(line, " -> "))
+	// }
+	// sort.Sort(sort.StringSlice(list))
+	// list = append([]string{"List of defined responses:", "```"}, append(list, []string{"```"}...)...)
+	// return strings.Join(list, "\n")
+	return ""
+}
+
+func addListMessage(args []string) string {
+	if args[0] != "add" {
+		return argumentsListExample
+	}
+
+	listname := args[1]
+	message := args[2]
+
+	err := RedisClient.LPush(listname, message).Err()
+	if err != nil {
+		panic(err)
+	}
+
+	return userMessageAddList(listname, message)
+}
+
 func listCommand(args []string) (msg string) {
+	switch len(args) {
+	case 1:
+		msg = showAllLists(args[0])
+	case 2:
+		// msg = unsetResponse(args[0], args[1])
+	case 3:
+		msg = addListMessage(args)
+	default:
+		msg = argumentsExample
+	}
 	return
 }
 
