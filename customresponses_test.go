@@ -143,21 +143,33 @@ func TestCustomResponses(t *testing.T) {
 		})
 
 		Convey("passive command", func() {
-			var possibleResults []string
-			msgs := []string{"wubba lubba dub dub", "aw geez Rick", "i don't know, maybe, "}
-			response := "lost in space"
-			listname := "#dummy"
+			Convey("with several list messages", func() {
+				var possibleResults []string
+				msgs := []string{"wubba lubba dub dub", "aw geez Rick", "i don't know, maybe, "}
+				response := "lost in space"
+				listname := "#dummy"
 
-			for _, m := range msgs {
-				sendCommand([]string{"list", "add", listname, m})
-				possibleResults = append(possibleResults, m+response)
-			}
-			sendCommand([]string{"match", "set", "where is my portal gun?", response, listname})
+				for _, m := range msgs {
+					sendCommand([]string{"list", "add", listname, m})
+					possibleResults = append(possibleResults, m+response)
+				}
+				sendCommand([]string{"match", "set", "where is my portal gun?", response, listname})
 
-			passiveCmd.Raw = "where is my portal gun?"
-			msg, err := customresponses(passiveCmd)
-			So(err, ShouldBeNil)
-			So(msg, ShouldBeIn, possibleResults)
+				passiveCmd.Raw = "where is my portal gun?"
+				msg, err := customresponses(passiveCmd)
+				So(err, ShouldBeNil)
+				So(msg, ShouldBeIn, possibleResults)
+			})
+
+			Convey("with formatted message", func() {
+				sendCommand([]string{"list", "add", "#fun", "Did you notice that %s is drunk?"})
+				sendCommand([]string{"match", "set", "fernand-o is drinking", "@fernando", "#fun"})
+
+				passiveCmd.Raw = "fernand-o is drinking"
+				msg, err := customresponses(passiveCmd)
+				So(err, ShouldBeNil)
+				So(msg, ShouldEqual, "Did you notice that @fernando is drunk?")
+			})
 		})
 	})
 }

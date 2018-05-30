@@ -328,22 +328,29 @@ func responsesCommand(command *bot.Cmd) (msg string, err error) {
 }
 
 func getListMessage(listname string) string {
-	if listname == "" {
-		return ""
-	}
-
 	msg, _ := RedisClient.SRandMember(listname).Result()
 	return msg
 }
 
+func getFormattedMessage(response, listname string) string {
+	if listname == "" {
+		return response
+	}
+
+	message := getListMessage(listname)
+	if strings.Contains(message, "%s") {
+		return fmt.Sprintf(message, response)
+	}
+
+	return message + response
+}
+
 func customresponses(command *bot.PassiveCmd) (msg string, err error) {
 	var match bool
-	var listmessage string
 	for _, m := range Matches {
 		match, err = regexp.MatchString(m.match, command.Raw)
 		if match {
-			listmessage = getListMessage(m.list)
-			msg = listmessage + m.response
+			msg = getFormattedMessage(m.response, m.list)
 			break
 		}
 	}
