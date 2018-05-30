@@ -24,4 +24,5 @@ A plugin for [go-bot](https://github.com/go-chat-bot/bot) that allows defining c
 - [x] Define lists with random responses to send combined with the defined response
 - [x] Send a random item list with the message
 - [x] Fix delete list command
+- [ ] Update usage examples
 - [ ] Create an easier way of deleting responses
