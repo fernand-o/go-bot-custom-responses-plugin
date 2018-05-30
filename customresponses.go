@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	argumentsExample     = "Usage: \n```\n!responses set \"Is someone there?\" \"Hello\" \n !responses unset \"Is someone there?\" \n !responses list\n```"
-	argumentsListExample = "Usage: \n```\n !responses list add mylist \"Some random message\" \n !responses list delete mylist \"Some random message\" \n !responses list clear mylist\n```"
+	argumentsExample     = "Usage: \n```\n!responses match set \"Is someone there?\" \"Hello\" \n !responses match unset 1 \n !responses match show\n```"
+	argumentsListExample = "Usage: \n```\n !responses list add #mylist \"Some random message\" \n !responses list delete #mylist \"Some random message\" \n !responses list clear #mylist\n```"
 	invalidArguments     = "Please inform the params, ex:"
 )
 
@@ -104,7 +104,7 @@ func userMessageListInvalidName() string {
 
 func showOrClearResponses(param string) (msg string) {
 	switch param {
-	case "show":
+	case "showall":
 		msg = showResponses()
 	case "clear":
 		msg = clearResponses()

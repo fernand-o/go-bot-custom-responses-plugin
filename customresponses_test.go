@@ -42,7 +42,7 @@ func TestCustomResponses(t *testing.T) {
 
 		Convey("match", func() {
 			Convey("show, clear", func() {
-				sendCommandAndAssertMessage([]string{"match", "show"}, userMessageNoResposesDefined())
+				sendCommandAndAssertMessage([]string{"match", "showall"}, userMessageNoResposesDefined())
 
 				ActiveCmd.Args = []string{"match", "set", "Life meaning", "42"}
 				_, _ = responsesCommand(ActiveCmd)
@@ -50,10 +50,10 @@ func TestCustomResponses(t *testing.T) {
 				_, _ = responsesCommand(ActiveCmd)
 
 				list := "List of defined responses:\n```\nI don't know Rick -> Just shoot them Morty\nLife meaning -> 42\n```"
-				sendCommandAndAssertMessage([]string{"match", "show"}, list)
+				sendCommandAndAssertMessage([]string{"match", "showall"}, list)
 
 				sendCommandAndAssertMessage([]string{"match", "clear"}, userMessageResponsesDeleted())
-				sendCommandAndAssertMessage([]string{"match", "show"}, userMessageNoResposesDefined())
+				sendCommandAndAssertMessage([]string{"match", "showall"}, userMessageNoResposesDefined())
 			})
 
 			Convey("set, unset", func() {
