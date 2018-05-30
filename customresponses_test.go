@@ -24,6 +24,11 @@ func sendCommandAndAssertMessage(args []string, expectedMessage string) {
 	So(msg, ShouldEqual, expectedMessage)
 }
 
+func sendCommand(args []string) {
+	ActiveCmd.Args = args
+	_, _ = responsesCommand(ActiveCmd)
+}
+
 func TestCustomResponses(t *testing.T) {
 	Convey("Given a text", t, func() {
 		RedisClient.FlushDB()
@@ -43,15 +48,10 @@ func TestCustomResponses(t *testing.T) {
 		Convey("match", func() {
 			Convey("show, clear", func() {
 				sendCommandAndAssertMessage([]string{"match", "showall"}, userMessageNoResposesDefined())
-
-				ActiveCmd.Args = []string{"match", "set", "Life meaning", "42"}
-				_, _ = responsesCommand(ActiveCmd)
-				ActiveCmd.Args = []string{"match", "set", "I don't know Rick", "Just shoot them Morty"}
-				_, _ = responsesCommand(ActiveCmd)
-
+				sendCommand([]string{"match", "set", "Life meaning", "42"})
+				sendCommand([]string{"match", "set", "I don't know Rick", "Just shoot them Morty"})
 				list := "List of defined responses:\n```\nI don't know Rick -> Just shoot them Morty\nLife meaning -> 42\n```"
 				sendCommandAndAssertMessage([]string{"match", "showall"}, list)
-
 				sendCommandAndAssertMessage([]string{"match", "clear"}, userMessageResponsesDeleted())
 				sendCommandAndAssertMessage([]string{"match", "showall"}, userMessageNoResposesDefined())
 			})
@@ -59,20 +59,14 @@ func TestCustomResponses(t *testing.T) {
 			Convey("set, unset", func() {
 				match := "Is someone there?"
 				response := "Hello"
-				ActiveCmd.Args = []string{"match", "set", match, response}
-				msg, err := responsesCommand(ActiveCmd)
-				So(err, ShouldBeNil)
-				So(msg, ShouldEqual, userMessageSetResponse(match, response))
+				sendCommandAndAssertMessage([]string{"match", "set", match, response}, userMessageSetResponse(match, response))
 
 				passiveCmd.Raw = "Hey! Is someone there?"
-				msg, err = customresponses(passiveCmd)
+				msg, err := customresponses(passiveCmd)
 				So(err, ShouldBeNil)
 				So(msg, ShouldEqual, response)
 
-				ActiveCmd.Args = []string{"match", "unset", "0"}
-				msg, err = responsesCommand(ActiveCmd)
-				So(err, ShouldBeNil)
-				So(msg, ShouldEqual, userMessageUnsetResponse(match))
+				sendCommandAndAssertMessage([]string{"match", "unset", "0"}, userMessageUnsetResponse(match))
 
 				passiveCmd.Raw = "Hey! Is someone there?"
 				msg, err = customresponses(passiveCmd)
@@ -88,12 +82,9 @@ func TestCustomResponses(t *testing.T) {
 				funfacts := []string{"Bananas are curved because they grow towards the sun.", "If you lift a kagaroo's tail off the ground it can't hop."}
 				sadfacts := []string{"Heart attacks are more likely to happen on a Monday."}
 
-				ActiveCmd.Args = []string{"list", "add", "#funfacts", funfacts[0]}
-				_, _ = responsesCommand(ActiveCmd)
-				ActiveCmd.Args = []string{"list", "add", "#funfacts", funfacts[1]}
-				_, _ = responsesCommand(ActiveCmd)
-				ActiveCmd.Args = []string{"list", "add", "#sadfacts", sadfacts[0]}
-				_, _ = responsesCommand(ActiveCmd)
+				sendCommand([]string{"list", "add", "#funfacts", funfacts[0]})
+				sendCommand([]string{"list", "add", "#funfacts", funfacts[1]})
+				sendCommand([]string{"list", "add", "#sadfacts", sadfacts[0]})
 
 				Convey("showall", func() {
 					list := strings.Join([]string{
@@ -128,28 +119,15 @@ func TestCustomResponses(t *testing.T) {
 			Convey("add, remove", func() {
 				listname := "#randomfacts"
 				message := "You cannot snore and dream at the same time."
-				ActiveCmd.Args = []string{"list", "add", listname, message}
-				msg, err := responsesCommand(ActiveCmd)
-				So(err, ShouldBeNil)
-				So(msg, ShouldEqual, userMessageListMessageAdded(listname, message))
-
-				ActiveCmd.Args = []string{"list", "remove", listname, message}
-				msg, err = responsesCommand(ActiveCmd)
-				So(err, ShouldBeNil)
-				So(msg, ShouldEqual, userMessageListMessageRemoved(listname, message))
-
-				ActiveCmd.Args = []string{"list", "add", "invalidname", message}
-				msg, err = responsesCommand(ActiveCmd)
-				So(err, ShouldBeNil)
-				So(msg, ShouldEqual, userMessageListInvalidName())
+				sendCommandAndAssertMessage([]string{"list", "add", listname, message}, userMessageListMessageAdded(listname, message))
+				sendCommandAndAssertMessage([]string{"list", "remove", listname, message}, userMessageListMessageRemoved(listname, message))
+				sendCommandAndAssertMessage([]string{"list", "add", "invalidname", message}, userMessageListInvalidName())
 			})
 		})
 
 		Convey("clearall", func() {
-			ActiveCmd.Args = []string{"list", "add", "#dummy", "message"}
-			_, _ = responsesCommand(ActiveCmd)
-			ActiveCmd.Args = []string{"match", "set", "Life meaning", "42"}
-			_, _ = responsesCommand(ActiveCmd)
+			sendCommand([]string{"list", "add", "#dummy", "message"})
+			sendCommand([]string{"match", "set", "Life meaning", "42"})
 
 			ActiveCmd.Args = []string{"list", "showall"}
 			msg, _ := responsesCommand(ActiveCmd)
@@ -171,13 +149,10 @@ func TestCustomResponses(t *testing.T) {
 			listname := "#dummy"
 
 			for _, m := range msgs {
-				ActiveCmd.Args = []string{"list", "add", listname, m}
-				_, _ = responsesCommand(ActiveCmd)
+				sendCommand([]string{"list", "add", listname, m})
 				possibleResults = append(possibleResults, m+response)
 			}
-
-			ActiveCmd.Args = []string{"match", "set", "where is my portal gun?", response, listname}
-			_, _ = responsesCommand(ActiveCmd)
+			sendCommand([]string{"match", "set", "where is my portal gun?", response, listname})
 
 			passiveCmd.Raw = "where is my portal gun?"
 			msg, err := customresponses(passiveCmd)
