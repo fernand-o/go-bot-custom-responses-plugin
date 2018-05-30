@@ -203,7 +203,7 @@ func matchCommand(args []string) (msg string) {
 	case 2:
 		msg = unsetResponse(args[0], args[1])
 		loadMatches()
-	case 3:
+	case 3, 4:
 		msg = setResponse(args)
 		loadMatches()
 	default:
@@ -327,12 +327,23 @@ func responsesCommand(command *bot.Cmd) (msg string, err error) {
 	return
 }
 
+func getListMessage(listname string) string {
+	if listname == "" {
+		return ""
+	}
+
+	msg, _ := RedisClient.SRandMember(listname).Result()
+	return msg
+}
+
 func customresponses(command *bot.PassiveCmd) (msg string, err error) {
 	var match bool
+	var listmessage string
 	for _, m := range Matches {
 		match, err = regexp.MatchString(m.match, command.Raw)
 		if match {
-			msg = m.response
+			listmessage = getListMessage(m.list)
+			msg = listmessage + m.response
 			break
 		}
 	}

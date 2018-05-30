@@ -163,5 +163,26 @@ func TestCustomResponses(t *testing.T) {
 			msg, _ = responsesCommand(ActiveCmd)
 			So(msg, ShouldEqual, userMessageDBErased())
 		})
+
+		Convey("passive command", func() {
+			var possibleResults []string
+			msgs := []string{"wubba lubba dub dub", "aw geez Rick", "i don't know, maybe, "}
+			response := "lost in space"
+			listname := "#dummy"
+
+			for _, m := range msgs {
+				ActiveCmd.Args = []string{"list", "add", listname, m}
+				_, _ = responsesCommand(ActiveCmd)
+				possibleResults = append(possibleResults, m+response)
+			}
+
+			ActiveCmd.Args = []string{"match", "set", "where is my portal gun?", response, listname}
+			_, _ = responsesCommand(ActiveCmd)
+
+			passiveCmd.Raw = "where is my portal gun?"
+			msg, err := customresponses(passiveCmd)
+			So(err, ShouldBeNil)
+			So(msg, ShouldBeIn, possibleResults)
+		})
 	})
 }
