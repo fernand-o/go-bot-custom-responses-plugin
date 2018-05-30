@@ -22,6 +22,6 @@ A plugin for [go-bot](https://github.com/go-chat-bot/bot) that allows defining c
 - [x] Create command to delete all responses -> (!responses list)
 - [x] List responses formatted
 - [x] Define lists with random responses to send combined with the defined response
-- [ ] Send a random item list with the message
-- [ ] Fix delete list command
+- [x] Send a random item list with the message
+- [x] Fix delete list command
 - [ ] Create an easier way of deleting responses
