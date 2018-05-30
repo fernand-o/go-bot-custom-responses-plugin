@@ -144,5 +144,24 @@ func TestCustomResponses(t *testing.T) {
 				So(msg, ShouldEqual, userMessageListInvalidName())
 			})
 		})
+
+		Convey("clearall", func() {
+			ActiveCmd.Args = []string{"list", "add", "#dummy", "message"}
+			_, _ = responsesCommand(ActiveCmd)
+			ActiveCmd.Args = []string{"match", "set", "Life meaning", "42"}
+			_, _ = responsesCommand(ActiveCmd)
+
+			ActiveCmd.Args = []string{"list", "showall"}
+			msg, _ := responsesCommand(ActiveCmd)
+			So(msg, ShouldNotEqual, userMessageNoListsDefined())
+
+			ActiveCmd.Args = []string{"match", "showall"}
+			msg, _ = responsesCommand(ActiveCmd)
+			So(msg, ShouldNotEqual, userMessageNoResposesDefined())
+
+			ActiveCmd.Args = []string{"clearall"}
+			msg, _ = responsesCommand(ActiveCmd)
+			So(msg, ShouldEqual, userMessageDBErased())
+		})
 	})
 }

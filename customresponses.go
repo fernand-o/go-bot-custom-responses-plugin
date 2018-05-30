@@ -102,6 +102,10 @@ func userMessageListInvalidName() string {
 	return "The list name must starts with #"
 }
 
+func userMessageDBErased() string {
+	return "Database erased."
+}
+
 func showOrClearResponses(param string) (msg string) {
 	switch param {
 	case "showall":
@@ -114,8 +118,17 @@ func showOrClearResponses(param string) (msg string) {
 	return
 }
 
-func clearResponses() string {
+func clearAll() string {
 	RedisClient.FlushDB()
+	return userMessageDBErased()
+}
+
+func clearResponses() string {
+	i := 0
+	for i <= recordCount() {
+		RedisClient.Del(matchesKeyFmt(strconv.Itoa(i)))
+		i++
+	}
 	return userMessageResponsesDeleted()
 }
 
@@ -131,6 +144,11 @@ func showResponses() string {
 	}
 	sort.Sort(sort.StringSlice(results))
 	return fmt.Sprintf("List of defined responses:\n```\n%s\n```", strings.Join(results, "\n"))
+}
+
+func recordCount() int {
+	count, _ := RedisClient.DBSize().Result()
+	return int(count)
 }
 
 func setResponse(args []string) string {
@@ -150,8 +168,8 @@ func setResponse(args []string) string {
 		"response": response,
 		"list":     list}
 
-	count, _ := RedisClient.DBSize().Result()
-	key := matchesKeyFmt(strconv.Itoa(int(count)))
+	count := recordCount()
+	key := matchesKeyFmt(strconv.Itoa(count))
 	err := RedisClient.HMSet(key, params).Err()
 	if err != nil {
 		panic(err)
@@ -281,12 +299,19 @@ func listCommand(args []string) (msg string) {
 }
 
 func responsesCommand(command *bot.Cmd) (msg string, err error) {
-	if len(command.Args) < 2 {
+	paramCount := len(command.Args)
+	if paramCount == 0 {
 		msg = argumentsExample
 		return
 	}
 
 	operation := command.Args[0]
+
+	if (paramCount < 2) && (operation != "clearall") {
+		msg = argumentsExample
+		return
+	}
+
 	args := append([]string{}, command.Args[1:]...)
 
 	switch operation {
@@ -294,6 +319,8 @@ func responsesCommand(command *bot.Cmd) (msg string, err error) {
 		msg = matchCommand(args)
 	case "list":
 		msg = listCommand(args)
+	case "clearall":
+		msg = clearAll()
 	default:
 		msg = argumentsExample
 	}
