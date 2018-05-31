@@ -47,7 +47,6 @@ func TestCustomResponses(t *testing.T) {
 
 		Convey("match", func() {
 			Convey("show, clear", func() {
-				sendCommandAndAssertMessage([]string{"match", "showall"}, userMessageNoResposesDefined())
 				sendCommand([]string{"match", "set", "Life meaning", "42", "#facts"})
 				sendCommand([]string{"match", "set", "I don't know Rick", "Just shoot them Morty"})
 				list := strings.Join([]string{
@@ -98,11 +97,11 @@ func TestCustomResponses(t *testing.T) {
 						"Defined lists:",
 						"```",
 						"#sadfacts",
-						" - " + sadfacts[0],
+						"  [" + sadfacts[0] + "]",
 						"",
 						"#funfacts",
-						" - " + funfacts[1],
-						" - " + funfacts[0],
+						"  [" + funfacts[1] + "]",
+						"  [" + funfacts[0] + "]",
 						"",
 						"```"}, "\n")
 					sendCommandAndAssertMessage([]string{"list", "showall"}, list)
@@ -112,8 +111,8 @@ func TestCustomResponses(t *testing.T) {
 					list := strings.Join([]string{
 						"```",
 						"#funfacts",
-						" - " + funfacts[1],
-						" - " + funfacts[0],
+						"  [" + funfacts[1] + "]",
+						"  [" + funfacts[0] + "]",
 						"```"}, "\n")
 					sendCommandAndAssertMessage([]string{"list", "show", "#funfacts"}, list)
 				})

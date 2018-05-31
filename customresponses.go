@@ -178,7 +178,7 @@ func getListMembers(listname string) string {
 	var results = []string{listname}
 	messages, _ := RedisClient.SMembers(listname).Result()
 	for _, m := range messages {
-		results = append(results, " - "+m)
+		results = append(results, fmt.Sprintf("  [%s]", m))
 	}
 	return strings.Join(results, "\n")
 }
