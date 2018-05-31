@@ -14,7 +14,7 @@ func assetInvalidArgument(args []string) {
 	ActiveCmd.Args = args
 	msg, err := responsesCommand(ActiveCmd)
 	So(err, ShouldBeNil)
-	So(msg, ShouldEqual, argumentsExample)
+	So(msg, ShouldEqual, argumentsGeneralExample)
 }
 
 func sendCommandAndAssertMessage(args []string, expectedMessage string) {

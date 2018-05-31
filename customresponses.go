@@ -13,10 +13,48 @@ import (
 )
 
 const (
-	argumentsExample     = "Usage: \n```\n!responses match set \"Is someone there?\" \"Hello\" \n !responses match unset 1 \n !responses match show\n```"
-	argumentsListExample = "Usage: \n```\n !responses list add #mylist \"Some random message\" \n !responses list delete #mylist \"Some random message\" \n !responses list clear #mylist\n```"
-	invalidArguments     = "Please inform the params, ex:"
+	invalidArguments = "Please inform the params, ex:"
 )
+
+var matchExample = strings.Join([]string{
+	"!responses match set \"Is someone there?\" \"Hello\"",
+	"!responses match set \"Rick Sanchez\" \"@rick\" #fun",
+	"!responses match unset 1",
+	"!responses match showall",
+}, "\n")
+
+var argumentsMatchExample = strings.Join([]string{
+	"Usage:",
+	"```",
+	matchExample,
+	"```",
+}, "\n")
+
+var listExample = strings.Join([]string{
+	"!responses list add #fun \"Hey %s, looks like you're guilty\"",
+	"!responses list add #fun \"Is that you %s?\"",
+	"!responses list show #fun",
+	"!responses list showall",
+	"!responses list remove #fun \"Is that you %s?\"",
+	"!responses list delete #fun",
+}, "\n")
+
+var argumentsListExample = strings.Join([]string{
+	"Usage:",
+	"```",
+	listExample,
+	"```",
+}, "\n")
+
+var argumentsGeneralExample = strings.Join([]string{
+	"```",
+	"Defining matches and responses:",
+	matchExample,
+	"",
+	"Defining lists to be used within the responses:",
+	listExample,
+	"```",
+}, "\n")
 
 type Match struct {
 	key      string
@@ -75,7 +113,7 @@ func userMessageUnsetResponse(match string) string {
 }
 
 func userMessageNoResposesDefined() string {
-	return fmt.Sprintf("There are no responses defined yet. \n %s", argumentsExample)
+	return fmt.Sprintf("There are no responses defined yet. \n %s", argumentsMatchExample)
 }
 
 func userMessageResponsesDeleted() string {
@@ -113,7 +151,7 @@ func showOrClearResponses(param string) (msg string) {
 	case "clear":
 		msg = clearResponses()
 	default:
-		msg = argumentsExample
+		msg = argumentsMatchExample
 	}
 	return
 }
@@ -153,7 +191,7 @@ func recordCount() int {
 
 func setResponse(args []string) string {
 	if args[0] != "set" {
-		return argumentsExample
+		return argumentsMatchExample
 	}
 
 	match := args[1]
@@ -179,7 +217,7 @@ func setResponse(args []string) string {
 
 func unsetResponse(param, id string) string {
 	if param != "unset" {
-		return argumentsExample
+		return argumentsMatchExample
 	}
 	key := matchesKeyFmt(id)
 
@@ -207,7 +245,7 @@ func matchCommand(args []string) (msg string) {
 		msg = setResponse(args)
 		loadMatches()
 	default:
-		msg = argumentsExample
+		msg = argumentsMatchExample
 	}
 	return
 }
@@ -293,7 +331,7 @@ func listCommand(args []string) (msg string) {
 	case 3:
 		msg = addOrRemoveListMessage(args)
 	default:
-		msg = argumentsExample
+		msg = argumentsListExample
 	}
 	return
 }
@@ -301,14 +339,14 @@ func listCommand(args []string) (msg string) {
 func responsesCommand(command *bot.Cmd) (msg string, err error) {
 	paramCount := len(command.Args)
 	if paramCount == 0 {
-		msg = argumentsExample
+		msg = argumentsGeneralExample
 		return
 	}
 
 	operation := command.Args[0]
 
 	if (paramCount < 2) && (operation != "clearall") {
-		msg = argumentsExample
+		msg = argumentsGeneralExample
 		return
 	}
 
@@ -322,7 +360,7 @@ func responsesCommand(command *bot.Cmd) (msg string, err error) {
 	case "clearall":
 		msg = clearAll()
 	default:
-		msg = argumentsExample
+		msg = argumentsGeneralExample
 	}
 	return
 }
@@ -365,6 +403,6 @@ func init() {
 	bot.RegisterCommand(
 		"responses",
 		"Defines a custom response to be sent when a given string is found in a message",
-		argumentsExample,
+		argumentsGeneralExample,
 		responsesCommand)
 }
