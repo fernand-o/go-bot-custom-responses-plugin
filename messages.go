@@ -8,8 +8,8 @@ import (
 var matchExample = strings.Join([]string{
 	"!responses match set \"Is someone there?\" \"Hello\"",
 	"!responses match set \"Rick Sanchez\" \"@rick\" #fun",
-	"!responses match unset 1",
 	"!responses match showall",
+	"!responses match unset 1",
 }, "\n")
 var argumentsMatchExample = formatMessage(matchExample)
 
@@ -42,11 +42,11 @@ func matchesKeyFmt(sufix string) string {
 }
 
 func userMessageSetResponse(match, response string) string {
-	return fmt.Sprintf("Ok! I will send a message with %s when i found any occurences of %s", response, match)
+	return fmt.Sprintf("Ok! I will send a message with `%s` when i found any occurences of `%s`", response, match)
 }
 
 func userMessageUnsetResponse(match string) string {
-	return fmt.Sprintf("Done, i'll not say anything more related to %s", match)
+	return fmt.Sprintf("Done, i'll not say anything more related to `%s`", match)
 }
 
 func userMessageNoResposesDefined() string {

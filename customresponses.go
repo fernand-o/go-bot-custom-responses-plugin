@@ -87,13 +87,14 @@ func showResponses() string {
 		return userMessageNoResposesDefined()
 	}
 
-	var results, line []string
+	var results []string
+	var line string
 	for _, k := range Matches {
-		line = []string{k.match, k.response}
-		results = append(results, strings.Join(line, " -> "))
+		line = fmt.Sprintf("[%s] [%s] [%s] [%s]", k.key, k.match, k.response, k.list)
+		results = append(results, line)
 	}
 	sort.Sort(sort.StringSlice(results))
-	return fmt.Sprintf("List of defined responses:\n```\n%s\n```", strings.Join(results, "\n"))
+	return fmt.Sprintf("List of defined responses:\n```\n[key] [match] [response] [list]\n%s\n```", strings.Join(results, "\n"))
 }
 
 func recordCount() int {
