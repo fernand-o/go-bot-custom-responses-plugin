@@ -310,6 +310,7 @@ func customresponses(command *bot.PassiveCmd) (msg string, err error) {
 
 func init() {
 	connectRedis()
+	loadMatches()
 	bot.RegisterPassiveCommand(
 		"customresponses",
 		customresponses)
